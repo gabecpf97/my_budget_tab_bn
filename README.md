@@ -1,4 +1,4 @@
-#Backend of a budget app
+# Backend of a budget app
 
 ## Stack used
 
