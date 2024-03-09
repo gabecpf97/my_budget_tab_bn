@@ -4,6 +4,8 @@ import { CallbackError, Error, ObjectId } from "mongoose";
 import { compare, hash } from "bcrypt";
 import User, { UserType } from "../models/user";
 import List, { ListType } from "../models/list";
+import passport from "passport";
+import { sign } from "jsonwebtoken";
 
 /**
  * api call to create a user
@@ -165,11 +167,78 @@ const user_get = async (req: Request, res: Response, next: NextFunction) => {
   }
 }
 
+const user_login = async (req: Request, res: Response, next: NextFunction) => {
+  passport.authenticate('local', {session: false}, (err: CallbackError, theUser: UserType, info: any) => {
+    if (err || !theUser) {
+      return next(new Error(info.messagae));
+    }
+    req.login(theUser, {session: false}, (err: CallbackError) => {
+      if (err) {
+        return next(err);
+      }
+      const token = sign({theUser}, process.env.S_KEY || "");
+      res.send({ token });
+    });
+  })(req, res, next);
+}
+
+const user_changePassword = [
+  body('password', "Passwrod is empty").trim().isLength({min: 1}).escape(),
+  check('password').custom(async (value: string, { req }) => {
+    try {
+      const theUser = await User.findById((req.user as UserType)._id);
+      if (!theUser) {
+        throw new Error("No such user");
+      }
+      const result = await compare(value, theUser.password as string)
+        if (!result) {
+          throw new Error("Password incorrect");
+        } else {
+          return true;
+        }
+    } catch (error) {
+      throw new Error("Error finding user");
+    }
+  }),
+  check('newPassword').trim().isLength({min: 6})
+  .withMessage('Passowrd must be longer than 6 letter').custom(value => {
+      return /\d/.test(value)
+  }).withMessage('Password must inclue numbers'),
+  check('confirm_newPassword', "Please enter the same password again").escape()
+  .custom((value: string, { req }) => {
+      return value === req.body.password;
+  }),
+  (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      next(errors.array());
+    } else {
+      hash(req.body.newPassword, 10, async (err: Error | undefined, hashedPassword: string) => {
+        if (err) {
+          return next(err);
+        }
+        try {
+          const theUser = await User.findByIdAndUpdate((req.user as UserType)._id, 
+                                  {password: hashedPassword}, {});
+          if(!theUser) {
+            return next(new Error("No such user"));
+          }
+          res.send({success: true});
+        } catch (error) {
+          return next(error);
+        }
+      })
+    }
+  }
+]
+
 const userController = {
   user_create,
   user_delete,
   user_edit,
   user_get,
+  user_login,
+  user_changePassword,
 }
 
 export default userController;
