@@ -1,9 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { body, check, validationResult } from "express-validator";
-import { CallbackError, Error, ObjectId } from "mongoose";
+import { CallbackError, Error } from "mongoose";
 import { compare, hash } from "bcrypt";
 import User, { UserType } from "../models/user";
-import List, { ListType } from "../models/list";
 import passport from "passport";
 import { sign } from "jsonwebtoken";
 
@@ -72,6 +71,9 @@ const user_create = [
   }
 ]
 
+/**
+ * api call to delete the user info from database
+ */
 const user_delete = [
   body('password').custom((value: string, { req }) => {
     return new Promise((resolve, reject) => {
@@ -100,6 +102,9 @@ const user_delete = [
   }
 ]
 
+/**
+ * api call that change user's name and email
+ */
 const user_edit = [
   body('username', "Username must be longer than 4 letter").trim().isLength({min: 4}).escape(),
   check('username').custom(async (value: string, { req }) => {
@@ -147,6 +152,9 @@ const user_edit = [
   }
 ]
 
+/**
+ * api call that get the user's information
+ */
 const user_get = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const theUser = await User.findById((req.user as UserType)._id);
@@ -167,6 +175,9 @@ const user_get = async (req: Request, res: Response, next: NextFunction) => {
   }
 }
 
+/**
+ * api call for user to login
+ */
 const user_login = async (req: Request, res: Response, next: NextFunction) => {
   passport.authenticate('local', {session: false}, (err: CallbackError, theUser: UserType, info: any) => {
     if (err || !theUser) {
@@ -182,6 +193,9 @@ const user_login = async (req: Request, res: Response, next: NextFunction) => {
   })(req, res, next);
 }
 
+/**
+ * api call to change user's password
+ */
 const user_changePassword = [
   body('password', "Passwrod is empty").trim().isLength({min: 1}).escape(),
   check('password').custom(async (value: string, { req }) => {

@@ -4,7 +4,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as JWTStrategy, ExtractJwt } from "passport-jwt";
 import { compare } from "bcrypt";
-import User, { UserType } from "./src/models/user";
+import User, { UserType } from "./models/user";
 import logger from "morgan";
 import cors from "cors";
 
