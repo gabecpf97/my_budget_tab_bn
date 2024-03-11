@@ -7,6 +7,7 @@ import { compare } from "bcrypt";
 import User, { UserType } from "./models/user";
 import logger from "morgan";
 import cors from "cors";
+import router from "./route";
 
 passport.use(new LocalStrategy(
   {
@@ -47,7 +48,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 
-app.use('/');
+app.use('/', router);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   res.status(500);

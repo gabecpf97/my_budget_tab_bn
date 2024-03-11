@@ -58,7 +58,7 @@ const user_create = [
         name: req.body.username as string,
         email: req.body.email as string,
         password: hashedPassword,
-        list: [],
+        lists: [],
         date: new Date(),
       });
       try {
@@ -166,7 +166,7 @@ const user_get = async (req: Request, res: Response, next: NextFunction) => {
       user: {
         username: theUser.name,
         email: theUser.email,
-        list: theUser.list,
+        lists: theUser.lists,
         date: theUser.date
       }
     });

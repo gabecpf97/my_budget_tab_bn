@@ -2,6 +2,7 @@ import express from "express";
 import userController from "./controller/userController";
 import passport from "passport";
 import itemController from "./controller/itemController";
+import listController from "./controller/listController";
 const router = express.Router();
 const auth = passport.authenticate('jwt', { session: false });
 
@@ -17,6 +18,12 @@ router.put('/user/change_password', auth, userController.user_changePassword);
 router.get('/item/:id', auth, itemController.item_get);
 router.post('/item/create', auth, itemController.item_create);
 router.put('/item', auth, itemController.item_edit);
-router.delete('/item', auth, itemController.item_delete);
+router.delete('/item/:id', auth, itemController.item_delete);
+
+// routes for list api calls 
+router.get('/list/:id', auth, listController.list_get);
+router.post('/list/create', auth, listController.list_create);
+router.put('/list', auth, listController.list_edit);
+router.delete('/list/:id', auth, listController.list_delete);
 
 export default router;

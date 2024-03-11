@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { body, validationResult } from "express-validator";
-import {  Error, Types } from "mongoose";
+import { Error, Types } from "mongoose";
 import Item, { ItemType } from "../models/item";
 import { UserType } from "../models/user";
 import List from "../models/list";
@@ -10,7 +10,7 @@ import List from "../models/list";
  */
 const item_get = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const theItem = await Item.findById(req.params._id);
+    const theItem = await Item.findById(req.params.id);
     if (!theItem) {
       return next(new Error("No such item"));
     }
@@ -85,20 +85,17 @@ const item_edit = [
  */
 const item_delete = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const theItem = await Item.findByIdAndDelete(req.body.itemID);
+    const theItem = await Item.findById(req.params.id);
     if (!theItem) {
       return next(new Error("No such item"));
     }
-    try {
-      const theList = await List.findById(theItem.belong);
-      if (!theList) {
-        return next(new Error("No such list"));
-      }
-      await List.findByIdAndUpdate(theList._id, { $pull: {items: req.body.itemID} });
-      res.send({ success: true });
-    } catch (error) {
-      return next(new Error("Error in deleting item from list"));
+    const theList = await List.findById(theItem.belong);
+    if (!theList) {
+      return next(new Error("No such list"));
     }
+    await List.findByIdAndUpdate(theList._id, { $pull: {items: theItem._id} });
+    await Item.findByIdAndDelete(theItem._id);
+    res.send({ success: true });
   } catch (error) {
     return next(new Error("Error in deleting item"));
   }

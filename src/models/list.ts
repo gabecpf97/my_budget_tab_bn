@@ -1,4 +1,4 @@
-import { Schema, model, Document } from "mongoose";
+import { Schema, model, Document, Types } from "mongoose";
 
 const List = model('List', new Schema({
   created: {type: Schema.Types.ObjectId, ref: "User", require: true},
@@ -9,11 +9,11 @@ const List = model('List', new Schema({
 }));
 
 export interface ListType extends Document {
-  created: Schema.Types.ObjectId,
-  name: String,
-  date: Date,
-  budget: Number,
-  items: Schema.Types.ObjectId[],
+  created?: Types.ObjectId | null,
+  name?: String | null,
+  date?: Date | null,
+  budget?: number | null,
+  items?: Types.ObjectId[],
 }
 
 export default List;
