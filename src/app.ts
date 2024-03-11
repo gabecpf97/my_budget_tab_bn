@@ -1,13 +1,14 @@
 import express, { Application, Request, Response, NextFunction } from "express";
-import { CallbackError, Connection, Error, connect, connection } from "mongoose";
+import { Connection, Error, connect, connection } from "mongoose";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as JWTStrategy, ExtractJwt } from "passport-jwt";
 import { compare } from "bcrypt";
-import User, { UserType } from "./models/user";
+import User from "./models/user";
 import logger from "morgan";
 import cors from "cors";
 import router from "./route";
+require('dotenv').config();
 
 passport.use(new LocalStrategy(
   {
@@ -32,6 +33,24 @@ passport.use(new LocalStrategy(
       }
     } catch (error) {
       return done(error);
+    }
+  }
+));
+
+passport.use(new JWTStrategy(
+  {
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    secretOrKey: process.env.S_Key as string,
+  },
+  async (jwtPayload: any, cb: Function) => {
+    try {
+      const theUser = await User.findById(jwtPayload.user._id);
+      if (!theUser) {
+        return cb(new Error("Please sign in or sign up"), false);
+      }
+      cb(null, theUser);
+    } catch (error) {
+      return cb(error, false);
     }
   }
 ));
