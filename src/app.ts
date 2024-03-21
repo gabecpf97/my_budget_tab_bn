@@ -8,7 +8,8 @@ import User from "./models/user";
 import logger from "morgan";
 import cors from "cors";
 import router from "./route";
-require('dotenv').config();
+import dotenv from "dotenv";
+dotenv.config();
 
 passport.use(new LocalStrategy(
   {
@@ -57,7 +58,7 @@ passport.use(new JWTStrategy(
 
 const app: Application = express();
 
-const mongoDB = ``;
+const mongoDB = `mongodb+srv://admin:${process.env.DB_Pass}@cluster0.dasxxcn.mongodb.net/?retryWrites=true&w=majority`;
 connect(mongoDB);
 const db: Connection = connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
@@ -77,6 +78,6 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   res.send({err});
 });
 
-app.listen(5000, () => {
-  console.log('server is running on port 5000');
+app.listen(process.env.PORT, () => {
+  console.log(`server is running on port ${process.env.PORT}`);
 })
