@@ -48,7 +48,7 @@ const user_create = [
   (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return next(errors.array);
+      return next(errors.array());
     }
     hash(req.body.password, 10, async (err: Error | undefined, hashedPassword: string) => {
       if (err) {
@@ -156,6 +156,7 @@ const user_edit = [
  * api call that get the user's information
  */
 const user_get = async (req: Request, res: Response, next: NextFunction) => {
+  console.log(`here: ${req.user}`);
   try {
     const theUser = await User.findById((req.user as UserType)._id);
     if (!theUser) {
@@ -187,8 +188,13 @@ const user_login = async (req: Request, res: Response, next: NextFunction) => {
       if (err) {
         return next(err);
       }
-      const token = sign({theUser}, process.env.S_KEY || "");
-      res.send({ token });
+      const secreteKey = process.env.S_Key;
+      if (secreteKey) {
+        const token = sign({theUser}, secreteKey || "");
+        res.send({ token });
+      } else {
+        return next(new Error("no secrete key"));
+      }
     });
   })(req, res, next);
 }

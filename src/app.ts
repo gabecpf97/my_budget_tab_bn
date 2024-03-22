@@ -27,9 +27,10 @@ passport.use(new LocalStrategy(
               return done(err);
             }
             if (!result) {
-              return done(null, false, { message: 'Password incorrect'});
+              return done(null, false, {messagae: 'Password incorrect'});
             }
-            done(null, theUser);
+            console.log(`${theUser}`);
+            return done(null, theUser);
         });
       }
     } catch (error) {
