@@ -144,7 +144,7 @@ const user_edit = [
         if (!newUser) {
           return next(new Error("Cannot find user"));
         }
-        res.send({success: true, username: newUser.name});
+        res.send({success: true, username: updatedUser.name});
       } catch (error) {
         return next(error);
       }
@@ -156,7 +156,6 @@ const user_edit = [
  * api call that get the user's information
  */
 const user_get = async (req: Request, res: Response, next: NextFunction) => {
-  console.log(`here: ${req.user}`);
   try {
     const theUser = await User.findById((req.user as UserType)._id);
     if (!theUser) {
@@ -181,8 +180,11 @@ const user_get = async (req: Request, res: Response, next: NextFunction) => {
  */
 const user_login = async (req: Request, res: Response, next: NextFunction) => {
   passport.authenticate('local', {session: false}, (err: CallbackError, theUser: UserType, info: any) => {
-    if (err || !theUser) {
-      return next(new Error(info.messagae));
+    
+    if (err) {
+      return next(err);
+    } else if (!theUser) {
+      return next(new Error(info.message));
     }
     req.login(theUser, {session: false}, (err: CallbackError) => {
       if (err) {
@@ -210,14 +212,14 @@ const user_changePassword = [
       if (!theUser) {
         throw new Error("No such user");
       }
-      const result = await compare(value, theUser.password as string)
-        if (!result) {
-          throw new Error("Password incorrect");
-        } else {
-          return true;
-        }
+      const result = await compare(value, theUser.password as string);
+      if (!result) {
+        throw new Error("Password incorrect");
+      } else {
+        return true;
+      }
     } catch (error) {
-      throw new Error("Error finding user");
+      throw error;
     }
   }),
   check('newPassword').trim().isLength({min: 6})
@@ -226,7 +228,7 @@ const user_changePassword = [
   }).withMessage('Password must inclue numbers'),
   check('confirm_newPassword', "Please enter the same password again").escape()
   .custom((value: string, { req }) => {
-      return value === req.body.password;
+      return value === req.body.newPassword;
   }),
   (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);

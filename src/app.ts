@@ -19,7 +19,7 @@ passport.use(new LocalStrategy(
     try {
       const theUser = await User.findOne({ email });
       if (!theUser) {
-        return done(null, false, {messagae: "Email address does not exists"});
+        return done(null, false, {message: "Email address does not exists"});
       } else {
         compare(password, theUser.password as string, 
           (err: Error | undefined, result: boolean) => {
@@ -27,9 +27,8 @@ passport.use(new LocalStrategy(
               return done(err);
             }
             if (!result) {
-              return done(null, false, {messagae: 'Password incorrect'});
+              return done(null, false, {message: 'Password incorrect'});
             }
-            console.log(`${theUser}`);
             return done(null, theUser);
         });
       }
@@ -46,7 +45,7 @@ passport.use(new JWTStrategy(
   },
   async (jwtPayload: any, cb: Function) => {
     try {
-      const theUser = await User.findById(jwtPayload.user._id);
+      const theUser = await User.findById(jwtPayload.theUser._id);
       if (!theUser) {
         return cb(new Error("Please sign in or sign up"), false);
       }
